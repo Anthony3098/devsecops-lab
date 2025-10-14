@@ -1,0 +1,27 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: docker build -t devsecops-lab:${{ github.sha }} .
+
+    - name: Install Trivy and scan image
+      run: |
+        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz -O /tmp/trivy.tar.gz
+        sudo tar zxvf /tmp/trivy.tar.gz -C /usr/local/bin trivy
+        trivy image --exit-code 1 --severity HIGH,CRITICAL devsecops-lab:${{ github.sha }}
