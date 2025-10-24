@@ -1,10 +1,55 @@
+# 🧪 DevSecOps Lab
+
+Laboratorio básico de integración **DevSecOps** utilizando **GitHub Actions**, **Docker** y **Trivy** para el análisis automático de vulnerabilidades en contenedores.
 
 ---
 
-### ✅ 2. Actualizar el workflow si quieres usar **Trivy oficial (recomendado)**
-Reemplaza tu `.github/workflows/devsecops.yml` por este actualizado (no descarga manualmente nada):
+## ⚙️ Estructura del Proyecto
 
-```yaml
+devsecops-lab/
+├── .github/workflows/devsecops.yml
+├── Dockerfile
+├── app.py
+└── README.md
+
+---
+
+## 🚀 Funcionamiento del Pipeline
+
+Cada vez que haces un **push o pull request** hacia la rama `main`, GitHub Actions ejecuta automáticamente las siguientes etapas:
+
+1. **Clona el código** (`actions/checkout@v4`)
+2. **Configura Docker Buildx** para construir imágenes.
+3. **Construye la imagen Docker** con tu aplicación Flask.
+4. **Escanea vulnerabilidades** usando **Trivy**, revisando el sistema base y las librerías.
+
+---
+
+## 🧰 Archivos Principales
+
+### Dockerfile
+```dockerfile
+FROM python:3.9-slim
+WORKDIR /app
+COPY . .
+RUN pip install flask
+EXPOSE 5000
+CMD ["python", "app.py"]
+
+
+app.py
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hola, DevSecOps!"
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+
+.github/workflows/devsecops.yml
 name: DevSecOps Pipeline
 
 on:
@@ -27,7 +72,7 @@ jobs:
     - name: 🏗️ Construir imagen Docker
       run: docker build -t devsecops-lab:${{ github.sha }} .
 
-    - name: 🔍 Escanear imagen Docker con Trivy
+    - name: 🔍 Escanear imagen con Trivy
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: devsecops-lab:${{ github.sha }}
@@ -36,3 +81,20 @@ jobs:
         severity: 'HIGH,CRITICAL'
         ignore-unfixed: true
         exit-code: '0'
+
+🧪 Ejecución local
+docker build -t devsecops-lab .
+docker run -p 5000:5000 devsecops-lab
+
+
+Luego abre tu navegador en 👉 http://localhost:5000
+
+✅ Resultado Esperado
+Estado	Significado
+🟢 Éxito	No se encontraron vulnerabilidades graves.
+🔴 Falla	Trivy detectó vulnerabilidades HIGH o CRITICAL.
+📖 Créditos
+
+Universidad de Sucre
+Laboratorio de DevSecOps
+Autor: Anthony3098
