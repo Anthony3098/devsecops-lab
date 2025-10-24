@@ -15,3 +15,9 @@ EXPOSE 5000
 
 # Comando para ejecutar la app
 CMD ["python", "app.py"]
+
+# 1️⃣ Construye la imagen
+docker build -t devsecops-lab .
+
+# 2️⃣ Ejecuta el contenedor y mapea el puerto
+docker run -p 5000:5000 devsecops-lab
