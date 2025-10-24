@@ -9,21 +9,23 @@ on:
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
-    container: python:3.10-slim
 
     steps:
     - name: 📥 Checkout del código
       uses: actions/checkout@v4
 
-    - name: 🧰 Instalar utilidades necesarias
+    - name: 🧰 Instalar dependencias del sistema
       run: |
-        apt-get update && apt-get install -y curl wget git tar
+        sudo apt-get update
+        sudo apt-get install -y curl wget git tar python3 python3-pip
 
-    - name: 📦 Instalar dependencias
+    - name: 🐍 Verificar versión de Python
+      run: python3 --version
+
+    - name: 📦 Instalar dependencias del proyecto
       run: |
-        python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then
-          pip install -r requirements.txt || echo "⚠️ Algunas dependencias no se instalaron, continuando..."
+          pip3 install -r requirements.txt || echo "⚠️ Algunas dependencias no se instalaron, continuando..."
         else
           echo "⚠️ No se encontró requirements.txt, omitiendo instalación."
         fi
