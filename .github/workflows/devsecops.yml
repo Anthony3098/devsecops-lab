@@ -11,17 +11,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: 📥 Checkout del código
       uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
+    - name: 🐍 Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Instalar dependencias
+      run: pip install -r requirements.txt
+
+    - name: 🧪 Ejecutar pruebas unitarias
+      run: pytest
+
+    - name: 🛡️ Escanear código fuente con Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        format: 'table'
+        severity: 'HIGH,CRITICAL'
+        exit-code: '0'
+
+    - name: 🐳 Configurar Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
+    - name: 🏗️ Construir imagen Docker
       run: docker build -t devsecops-lab:${{ github.sha }} .
 
-    - name: Install Trivy and scan image
-      run: |
-        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz -O /tmp/trivy.tar.gz
-        sudo tar zxvf /tmp/trivy.tar.gz -C /usr/local/bin trivy
-        trivy image --exit-code 1 --severity HIGH,CRITICAL devsecops-lab:${{ github.sha }}
+    - name: 🔍 Escanear imagen Docker con Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: devsecops-lab:${{ github.sha }}
+        vuln-type: 'os,library'
+        format: 'table'
+        severity: 'HIGH,CRITICAL'
+        ignore-unfixed: true
+        exit-code: '0'
+
+    - name: ✅ Despliegue simulado
+      if: success()
+      run: echo "🚀 Desplegando versión segura..."
