@@ -105,9 +105,33 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         run: |
-          echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-          docker tag ${{ env.IMAGE_TAG }} $DOCKER_USER/devsecops-lab:latest
-          docker push $DOCKER_USER/devsecops-lab:latest
+          if [ -z "$DOCKER_USER" ] || [ -z "$DOCKER_PASS" ]; then
+            echo "❌ Error: los secretos DOCKER_USER o DOCKER_PASS no están configurados correctamente."
+            exit 1
+          fi
+
+          echo "🔐 Autenticando con Docker Hub..."
+          echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin || { 
+            echo "❌ Falló el login en Docker Hub. Verifica tus secretos en GitHub → Settings → Secrets → Actions."; 
+            exit 1; 
+          }
+
+          IMAGE_NAME="${DOCKER_USER}/devsecops-lab"
+          COMMIT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          IMAGE_TAG_COMMIT="${IMAGE_NAME}:${COMMIT_SHA}"
+          IMAGE_TAG_LATEST="${IMAGE_NAME}:latest"
+
+          echo "🏗️ Etiquetando imagen..."
+          docker tag ${{ env.IMAGE_TAG }} "${IMAGE_TAG_COMMIT}"
+          docker tag ${{ env.IMAGE_TAG }} "${IMAGE_TAG_LATEST}"
+
+          echo "⬆️ Subiendo imagen a Docker Hub..."
+          docker push "${IMAGE_TAG_COMMIT}"
+          docker push "${IMAGE_TAG_LATEST}"
+
+          echo "✅ Imagen publicada exitosamente en Docker Hub:"
+          echo "   🔹 ${IMAGE_TAG_COMMIT}"
+          echo "   🔹 ${IMAGE_TAG_LATEST}"
 
       - name: ✅ Despliegue simulado final
         if: success()
