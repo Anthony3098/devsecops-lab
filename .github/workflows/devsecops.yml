@@ -54,7 +54,7 @@ jobs:
           pip3 install safety
           safety check --full-report || true
 
-           - name: 🛡️ Escanear código fuente con Trivy (SCA)
+      - name: 🛡️ Escanear código fuente con Trivy (SCA)
         uses: aquasecurity/trivy-action@0.24.1
         with:
           scan-type: 'fs'
@@ -62,7 +62,6 @@ jobs:
           severity: 'HIGH,CRITICAL'
           ignore-unfixed: true
           exit-code: '1'
-
 
       - name: 🔧 Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
