@@ -91,8 +91,8 @@ jobs:
       - name: 🚀 Push de imagen (si pasa escaneo)
         if: success()
         env:
-          DOCKER_USER: ${{ ELEMENTARY46 }}
-          DOCKER_PASS: ${{ Magnus2446 }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         run: |
           echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
           docker tag ${{ env.IMAGE_TAG }} $DOCKER_USER/devsecops-lab:latest
