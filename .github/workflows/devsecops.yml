@@ -38,6 +38,16 @@ jobs:
           echo "No hay pruebas que ejecutar."
         fi
 
+    - name: 🧠 Escanear vulnerabilidades de código con Bandit
+      run: |
+        pip3 install bandit
+        bandit -r . -ll
+
+    - name: 🔒 Escanear dependencias Python con Safety
+      run: |
+        pip3 install safety
+        safety check --full-report || true
+
     - name: 🛡️ Escanear código fuente con Trivy
       uses: aquasecurity/trivy-action@master
       with:
