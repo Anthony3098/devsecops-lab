@@ -55,7 +55,7 @@ jobs:
           safety check --full-report || true
 
       - name: 🛡️ Escanear código fuente con Trivy (SCA)
-        uses: aquasecurity/trivy-action@v0.24.0
+uses: aquasecurity/trivy-action@0.24.1
         with:
           scan-type: 'fs'
           format: 'table'
